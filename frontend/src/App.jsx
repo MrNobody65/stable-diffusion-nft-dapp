@@ -13,9 +13,9 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [image, setImage] = useState(null);
-  const [cid, setCid] = useState();
-  const [metadataCid, setMetadataCid] = useState();
 
+  const cid = useRef()
+  const metadataCid = useRef()
   const prev_prompt = useRef("")
 
   function inputPrompt(event) {
@@ -33,15 +33,15 @@ function App() {
 
   async function uploadImageToIPFS() {
     const uploadImg = await pinata.upload.base64(image)
-    setCid(cid => uploadImg.IpfsHash)
+    cid.current = uploadImg.IpfsHash
 
     const metadata = JSON.stringify({
       prompt: prev_prompt.current,
-      image: `https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${cid}`
+      image: `https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${cid.current}`
     })
 
     const uploadMetadata = await pinata.upload.json(metadata)
-    setMetadataCid(metadataCid => uploadMetadata.IpfsHash)
+    metadataCid.current = uploadMetadata.IpfsHash
 
     return true
   }
@@ -57,15 +57,10 @@ function App() {
       const abi = contract.abi
       const contractAddress = import.meta.env.VITE_SC_ADDRESS
 
-      const myNftContract = new ethers.Contract(contractAddress, abi, signer)
+      const mySDNContract = new ethers.Contract(contractAddress, abi, signer)
 
-      const mintNFT = async () => {
-        let nftTxn = await myNftContract.safeMint(signer.address, `https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${metadataCid}`)
-        await nftTxn.wait()
-        console.log("Mint successfully")
-      }
-
-      await mintNFT()
+      let SDNTxn = await mySDNContract.safeMint(signer.address, `https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${metadataCid.current}`)
+      SDNTxn.wait()
     }
   }
 
