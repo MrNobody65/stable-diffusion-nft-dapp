@@ -1,4 +1,7 @@
 __pycache__
 .env
+artifacts
+cache
 venv
 node_modules
+typechain-types
