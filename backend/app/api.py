@@ -8,8 +8,6 @@ from diffusers import StableDiffusionPipeline
 from io import BytesIO
 import base64
 
-print(torch.cuda.is_available())
-
 app = FastAPI()
 
 app.add_middleware(
