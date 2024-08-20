@@ -1,0 +1,101 @@
+* {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+button {
+    font-weight: bold;
+    text-align: center;
+    background-color: hsl(120, 50%, 40%);
+    border: none;
+    color: white;
+    width: 120px;
+    margin: 0 10px;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+button:hover {
+    background-color: hsl(120, 50%, 30%);
+    color: black;
+}
+
+button,
+input {
+    font-size: 1.2rem;
+    border-radius: 25px;
+    padding: 10px 20px;
+}
+
+.SD-container {
+    background-color: hsl(0, 0%, 90%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 25px;
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 50px;
+}
+
+.prompt-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    margin-top: 20px;
+}
+
+.prompt-container input {
+    flex-grow: 1;
+    border: 2px solid black;
+    margin-left: 10px;
+}
+
+.spinner-container,
+.images-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    background-color: hsl(0, 0%, 80%);
+    border-radius: 25px;
+    width: 80%;
+    min-height: 500px;
+    margin-top: 20px;
+}
+
+.spinner {
+    background-color: hsla(0, 0%, 0%, 0);
+    border: 40px solid hsl(120, 50%, 40%);
+    border-top: 40px solid hsl(120, 50%, 30%);
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.image-container {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+    padding: 40px;
+}
+
+.image-container img {
+    border-radius: 25px;
+    width: 100%;
+    margin-bottom: 10px;
+}
