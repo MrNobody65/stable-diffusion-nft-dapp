@@ -4,5 +4,5 @@ artifacts
 cache
 node_modules
 typechain-types
-/ignition/deployments
+blockchain/ignition/deployments
 venv
