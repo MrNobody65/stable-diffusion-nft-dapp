@@ -11,6 +11,11 @@ const config: HardhatUserConfig = {
       url: process.env.INFURA_SEPOLIA_ENDPOINT,
       accounts: [process.env.PRIVATE_KEY ?? ""]
     }
+  },
+  etherscan: {
+    apiKey: {
+      sepolia: process.env.ETHERSCAN_API_KEY ?? "",
+    },
   }
 };
 

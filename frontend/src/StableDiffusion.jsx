@@ -1,18 +1,29 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import Loading from "./Loading.jsx";
 import Card from "./Card.jsx"
+import { ConnectedContext } from './App.jsx';
 
 import axios from 'axios';
 import { pinata } from "./utils/config.js"
 import contract from "../../blockchain/artifacts/contracts/StableDiffusionNFT.sol/StableDiffusionNFT.json"
-import { ethers } from 'ethers'
+import { BrowserProvider, Contract } from 'ethers';
+
+import { Buffer } from 'buffer';
+window.Buffer = Buffer
 
 function StableDiffusion() {
-    const [isLoading, setIsLoading] = useState(false);
-    const [prompt, setPrompt] = useState("");
-    const [images, setImages] = useState(null);
+    const [isLoading, setIsLoading] = useState(false)
+    const [prompt, setPrompt] = useState("")
+    const [images, setImages] = useState(null)
+    const [notAllowTxn, setNotAllowTxn] = useState(false)
 
     const prev_prompt = useRef("")
+
+    const { connected } = useContext(ConnectedContext)
+
+    useEffect(() => {
+        if (connected) setNotAllowTxn(false)
+    }, [connected])
 
     function inputPrompt(event) {
         setPrompt(event.target.value)
@@ -28,12 +39,20 @@ function StableDiffusion() {
     };
 
     async function uploadImageToIPFS(image) {
-        const uploadImg = await pinata.upload.base64(image)
+        const img_bstr = window.atob(image);
+        let n = img_bstr.length;
+        const img_u8arr = new Uint8Array(n);
+        while (n--) {
+            img_u8arr[n] = img_bstr.charCodeAt(n);
+        }
+        const img_file = new File([img_u8arr], 'sdn.png', { type: 'image/png' })
 
-        const metadata = JSON.stringify({
+        const uploadImg = await pinata.upload.file(img_file)
+
+        const metadata = {
             prompt: prev_prompt.current,
             image: `https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${uploadImg.IpfsHash}`
-        })
+        }
 
         const uploadMetadata = await pinata.upload.json(metadata)
 
@@ -41,30 +60,29 @@ function StableDiffusion() {
     }
 
     async function mintSDN(image) {
-        const cid = await uploadImageToIPFS(image)
-        if (cid) {
-            const provider = new ethers.InfuraProvider('sepolia', import.meta.env.VITE_INFURA_API_KEY)
-
-            const privateKey = import.meta.env.VITE_PRIVATE_KEY
-            const signer = new ethers.Wallet(privateKey, provider)
-
-            const abi = contract.abi
-            const contractAddress = import.meta.env.VITE_SC_ADDRESS
-
-            const mySDNContract = new ethers.Contract(contractAddress, abi, signer)
-
-            let SDNTxn = await mySDNContract.safeMint(signer.address, `https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${cid}`)
-            SDNTxn.wait()
+        if (connected) {
+            const cid = await uploadImageToIPFS(image)
+            if (cid) {
+                const provider = new BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner()
+                const contractABI = contract.abi
+                const contractAddress = import.meta.env.VITE_SC_ADDRESS
+                const SDNContract = new Contract(contractAddress, contractABI, signer)
+                const mintTxn = await SDNContract.safeMint(signer.address, `https://${import.meta.env.VITE_GATEWAY_URL}/ipfs/${cid}`)
+                await mintTxn.wait()
+            }
         }
+        else setNotAllowTxn(true)
     }
 
     return (
         <>
             <div className="SD-container">
                 <h1>Stable Diffusion NFT</h1>
+                {notAllowTxn ? <p className='error'>Please connect to MetaMask to start minting SDN.</p> : null}
                 <div className="prompt-container">
                     <input type="text" placeholder='Enter your prompt' value={prompt} onChange={(event) => inputPrompt(event)} />
-                    <button onClick={generate}>Generate</button>
+                    <button onClick={generate} disabled={isLoading}>Generate</button>
                 </div>
 
                 {isLoading ? <Loading /> : images ?
