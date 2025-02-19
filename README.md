@@ -60,13 +60,13 @@ The project source code contains 3 main components:
     
     ***Note:*** *You must run two below commands in the same order with this docs to make sure the code will work.* 
     ```sh
-    pip install -r requirements-python.txt
+    pip install -r requirements-pytorch.txt
     pip install -r requirements-others.txt  
     ```
 
-4. Create `nodejs` enviroment for frontend with `npm`
+4. Install dependencies for frontend
     ```sh
-    npm init
+    npm i
     ```
 
 5. Create `.env` files based on `.env.example` for each folder and enter the required variables.
